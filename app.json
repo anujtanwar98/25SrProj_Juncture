@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "25SrProj_Juncture",
+    "name": "Juncture",
     "slug": "25SrProj_Juncture",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -12,7 +12,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.myapp.app"
     },
     "android": {
       "adaptiveIcon": {
@@ -22,6 +23,14 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "d9f569fe-18bb-40b4-b6c2-72b71acee8ce"
+      }
     }
   }
 }
