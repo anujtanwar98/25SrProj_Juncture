@@ -14,7 +14,7 @@ Before you begin, ensure you have the following installed:
 
 Frontend:
 - **Framework:** React Native
-- **Development Platform:** Expo
+- **Testing Platform:** Expo
 - **IDE:** Visual Studio Code
 
 Backend:
