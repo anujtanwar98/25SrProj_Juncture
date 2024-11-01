@@ -175,34 +175,95 @@ export default function Calendar() {
     }
   }, [lastSyncToken]);
 
-  const formatEventTime = (timestamp) => {
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const formatEventTime = (when) => {
+    if (!when) {
+      return 'Invalid Time';
+    }
+    // Check if it's an all-day event
+    if (when.all_day || when.object === 'date' || when.start_date) {
+      return 'All day';
+    }
+    try {
+      if (typeof when.start_time === 'number') {
+        const date = new Date(when.start_time * 1000);
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } else if (typeof when.start_time === 'string') {
+        const date = new Date(when.start_time);
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+      return 'Invalid Time Format';
+    } catch (error) {
+      return 'Time Error';
+    }
   };
 
-  const formatEventDate = (timestamp) => {
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+  const formatEventDate = (when) => {
+    if (!when) {
+      return 'Invalid Date';
+    }
+    try {
+      // Handle all-day events first
+      if (when.all_day || when.object === 'date' || when.start_date) {
+        // For all-day events, use the start_date directly or convert timestamp
+        let date;
+        if (when.start_date) {
+          date = new Date(when.start_date);
+        } else if (when.start_time) {
+          // If it's a timestamp, convert to local date without time component
+          date = new Date(typeof when.start_time === 'number' ? when.start_time * 1000 : when.start_time);
+        }
+        // Add the timezone offset to correct the date
+        if (date) {
+          date = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+          return date.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+        }
+      }
+      // Handle regular events with start_time
+      if (when.start_time) {
+        const date = new Date(typeof when.start_time === 'number' ? when.start_time * 1000 : when.start_time);
+        return date.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+      }
+      // Handle other date formats
+      const possibleDateFields = ['date', 'when', 'time'];
+      for (const field of possibleDateFields) {
+        if (when[field]) {
+          const date = new Date(when[field]);
+          if (!isNaN(date.getTime())) {
+            return date.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+          }
+        }
+      }
+      return 'Invalid Date Format';
+    } catch (error) {
+      console.error('Date formatting error:', error);
+      return 'Date Error';
+    }
   };
-
-  const renderEventItem = ({ item }) => (
-    <TouchableOpacity style={styles.eventCard}>
-      <View style={styles.eventTimeContainer}>
-        <Text style={styles.eventTime}>{formatEventTime(item.when.start_time)}</Text>
-        <Text style={styles.eventDate}>{formatEventDate(item.when.start_time)}</Text>
-      </View>
-      <View style={styles.eventDetails}>
-        <Text style={styles.eventTitle} numberOfLines={1}>
-          {item.title || 'Untitled Event'}
-        </Text>
-        {item.location && (
-          <Text style={styles.eventLocation} numberOfLines={1}>
-            📍 {item.location}
+  
+  const renderEventItem = ({ item }) => {
+    return (
+      <TouchableOpacity style={styles.eventCard}>
+        <View style={styles.eventTimeContainer}>
+          <Text style={[ styles.eventTime, item.when?.all_day && styles.allDayEventTime ]}>
+            {formatEventTime(item.when)}
           </Text>
-        )}
-      </View>
-    </TouchableOpacity>
-  );
+          <Text style={styles.eventDate}>
+            {formatEventDate(item.when)}
+          </Text>
+        </View>
+        <View style={styles.eventDetails}>
+          <Text style={styles.eventTitle} numberOfLines={1}>
+            {item.title || 'Untitled Event'}
+          </Text>
+          {item.location && (
+            <Text style={styles.eventLocation} numberOfLines={1}>
+              📍 {item.location}
+            </Text>
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   const renderHeader = () => (
     <View style={styles.header}>
