@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, SafeAreaView } from 'react-native';
 import { auth } from '../auth/firebase';
 import { signOut } from 'firebase/auth';
+import Calendar from './Calendar';
 
 export default function HomeScreen({ navigation }) {
   const handleSignOut = async () => {
@@ -13,33 +14,66 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <Text>Email: {auth.currentUser?.email}</Text>
-      <TouchableOpacity style={styles.button} onPress={handleSignOut}>
-        <Text style={styles.buttonText}>Sign out</Text>
+  const renderHeader = () => (
+    <View style={styles.header}>
+      <View style={styles.headerLeft}>
+        <Text style={styles.welcomeText}>Welcome!</Text>
+        <Text style={styles.emailText}>{auth.currentUser?.email}</Text>
+        <Text style={styles.emailText}>{auth.currentUser?.displayName}</Text>
+      </View>
+      <TouchableOpacity
+        style={styles.logoutButton}
+        onPress={handleSignOut}>
+        <Text style={styles.logoutButtonText}>Sign out</Text>
       </TouchableOpacity>
     </View>
+  );
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {renderHeader()}
+      <Calendar />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
+    backgroundColor: '#fff',
   },
-  button: {
-    backgroundColor: '#0782F9',
-    width: '60%',
-    padding: 15,
-    borderRadius: 10,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 40,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    // backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
-  buttonText: {
-    color: 'white',
-    fontWeight: '700',
-    fontSize: 16,
+  headerLeft: {
+    flex: 1,
+  },
+  welcomeText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1a73e8',
+    marginBottom: 4,
+  },
+  emailText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  logoutButton: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#f1f3f4',
+  },
+  logoutButtonText: {
+    color: '#666',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });

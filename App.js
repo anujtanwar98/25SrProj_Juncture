@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './screens/LoginScreen';
+import RegisterScreen from './screens/RegisterScreen';
 import HomeScreen from './screens/HomeScreen';
 import { auth } from './auth/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -28,7 +29,10 @@ export default function App() {
         {user ? (
           <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         ) : (
-          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>

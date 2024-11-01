@@ -1,23 +1,53 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, TouchableOpacity, Text, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { auth } from '../auth/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { getFirestore, setDoc, doc } from 'firebase/firestore';
 
-export default function LoginScreen({ navigation }) {
+export default function RegisterScreen({ navigation }) {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async () => {
-    if (!email || !password) {
+  const handleSignUp = async () => {
+    if (!firstName || !lastName || !email || !password || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
       return;
     }
 
     setIsLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      await updateProfile(user, {
+        displayName: `${firstName} ${lastName}`,
+      });
+
+      const db = getFirestore();
+      await setDoc(doc(db, 'users', user.uid), {
+        uid: user.uid,  // Store the user's UID
+        firstName,
+        lastName,
+        email,
+        displayName: `${firstName} ${lastName}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      console.log('User added to Firestore successfully');
+      
     } catch (error) {
+      console.error('Error:', error);
       Alert.alert('Error', error.message);
     } finally {
       setIsLoading(false);
@@ -30,6 +60,20 @@ export default function LoginScreen({ navigation }) {
       style={styles.container}
     >
       <View style={styles.inputContainer}>
+        <TextInput
+          placeholder="First Name"
+          value={firstName}
+          onChangeText={setFirstName}
+          style={styles.input}
+          autoCapitalize="words"
+        />
+        <TextInput
+          placeholder="Last Name"
+          value={lastName}
+          onChangeText={setLastName}
+          style={styles.input}
+          autoCapitalize="words"
+        />
         <TextInput
           placeholder="Email"
           value={email}
@@ -45,25 +89,32 @@ export default function LoginScreen({ navigation }) {
           style={styles.input}
           secureTextEntry
         />
+        <TextInput
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          style={styles.input}
+          secureTextEntry
+        />
       </View>
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity
-          onPress={handleLogin}
+          onPress={handleSignUp}
           style={styles.button}
           disabled={isLoading}
         >
           <Text style={styles.buttonText}>
-            {isLoading ? 'Loading...' : 'Login'}
+            {isLoading ? 'Creating Account...' : 'Sign Up'}
           </Text>
         </TouchableOpacity>
         
         <TouchableOpacity
-          onPress={() => navigation.navigate('Register')}
+          onPress={() => navigation.navigate('Login')}
           style={[styles.button, styles.buttonOutline]}
         >
           <Text style={styles.buttonOutlineText}>
-            Create an Account
+            Back to Login
           </Text>
         </TouchableOpacity>
       </View>
