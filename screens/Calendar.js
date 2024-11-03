@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Button, Text, Platform, FlatList, StyleSheet, SafeAreaView, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, SafeAreaView, ActivityIndicator, TouchableOpacity } from 'react-native';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = Platform.select({
-  ios: 'https://two5srproj-server.onrender.com',
-  default: 'https://two5srproj-server.onrender.com',
-});
+const API_BASE_URL = 'https://two5srproj-server.onrender.com';
 
 export default function Calendar() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
