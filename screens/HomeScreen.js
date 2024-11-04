@@ -1,8 +1,8 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, SafeAreaView } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, SafeAreaView, ScrollView } from 'react-native';
 import { auth } from '../auth/firebase';
 import { signOut } from 'firebase/auth';
-import Calendar from './Calendar';
+import CalendarUi from './CalendarUi';
 
 export default function HomeScreen({ navigation }) {
   const handleSignOut = async () => {
@@ -32,7 +32,9 @@ export default function HomeScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       {renderHeader()}
-      <Calendar />
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        <CalendarUi />
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -41,6 +43,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   header: {
     flexDirection: 'row',
