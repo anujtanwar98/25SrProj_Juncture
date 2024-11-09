@@ -270,6 +270,40 @@ export default function CalendarUi() {
               📍 {item.location}
             </Text>
           )}
+          {item.participants && item.participants.length > 0 && (
+            <View style={styles.participantsContainer}>
+              <Text style={styles.participantsTitle}>Participants:</Text>
+              {item.participants.map((participant, index) => (
+                <View key={index} style={styles.participantRow}>
+                  <Text style={styles.participantEmail} numberOfLines={1}>
+                    • {participant.email}
+                  </Text>
+                  <Text style={[
+                    styles.participantStatus,
+                    {
+                      color: participant.status === 'yes' 
+                        ? '#4CAF50'
+                        : participant.status === 'no' 
+                          ? '#F44336'
+                          :participant.status === 'maybe'
+                            ? '#FFA000'
+                            : '#666',
+                      backgroundColor: participant.status === 'yes'
+                        ? '#E8F5E9'
+                        : participant.status === 'no'
+                          ? '#FFEBEE'
+                        : participant.status === 'maybe'
+                          ? '#FFF3E0'
+                          :'#f1f3f4',
+                      paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12,
+                    }
+                  ]}>
+                    {participant.status === 'yes' ? '✓ Going' : participant.status === 'no' ? '✗ Not Going' : participant.status === 'maybe' ? '? Maybe' : 'Invited'}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
         </View>
       </TouchableOpacity>
     );
@@ -503,6 +537,35 @@ const styles = StyleSheet.create({
   logoutButtonText: {
     color: '#666',
     fontSize: 14,
+    fontWeight: '500',
+  },
+
+  participantsContainer: {
+    marginTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#00e',
+    paddingTop: 8,
+  },
+  participantsTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 4,
+  },
+  participantRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 2,
+  },
+  participantEmail: {
+    fontSize: 13,
+    color: '#666',
+    flex: 1,
+    marginRight: 8,
+  },
+  participantStatus: {
+    fontSize: 12,
     fontWeight: '500',
   },
 });
