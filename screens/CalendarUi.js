@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, Text, SafeAreaView, FlatList, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Text, SafeAreaView, FlatList, TouchableOpacity, ScrollView } from 'react-native';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -262,7 +262,7 @@ export default function CalendarUi() {
           </Text>
         </View>
         <View style={styles.eventDetails}>
-          <Text style={styles.eventTitle} numberOfLines={1}>
+          <Text style={styles.eventTitle}>
             {item.title || 'Untitled Event'}
           </Text>
           {item.location && (
@@ -297,13 +297,15 @@ export default function CalendarUi() {
     </View>
   );
 
-  return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={styles.container}>
-      {isAuthenticated ? (
-        <>
-          {renderHeader()}
-        <View style={styles.calendarContainer}>
+  const renderCalendarWithEvents = () => (
+    <View style={styles.mainContainer}>
+      {renderHeader()}
+      <ScrollView
+        stickyHeaderIndices={[0]}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.calendarWrapper}>
           <Calendar
             onDayPress={onDayPress}
             enableSwipeMonths={true}
@@ -321,18 +323,28 @@ export default function CalendarUi() {
               monthTextColor: '#2d4150',
             }}
           />
-          <FlatList
-            data={eventsForSelectedDate}
-            renderItem={renderEventItem}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.eventsList}
-            showsVerticalScrollIndicator={false}
-            refreshing={refreshing}
-            onRefresh={fetchEvents}
-            ListEmptyComponent={renderEmpty()}
-          />
         </View>
-        </>
+
+        <View style={styles.eventsSection}>
+          {eventsForSelectedDate.length > 0 ? (
+            eventsForSelectedDate.map(item => (
+              <View key={item.id}>
+                {renderEventItem({ item })}
+              </View>
+            ))
+          ) : (
+            renderEmpty()
+          )}
+        </View>
+      </ScrollView>
+    </View>
+  );
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+    <SafeAreaView style={styles.container}>
+      {isAuthenticated ? (
+        renderCalendarWithEvents()
       ) : (
         <View style={styles.authContainer}>
           <Text style={styles.welcomeText}>Welcome to Juncture</Text>
@@ -358,6 +370,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  calendarWrapper: {
+    backgroundColor: '#fff',
+    zIndex: 1,
+  },
+  eventsSection: {
+    padding: 20,
   },
   calendarContainer: {
     flex: 1,
