@@ -5,6 +5,7 @@ import * as WebBrowser from 'expo-web-browser';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Calendar } from 'react-native-calendars';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { DateTime } from 'luxon';
 
 const API_BASE_URL = 'https://two5srproj-server.onrender.com';
 
@@ -207,15 +208,23 @@ export default function CalendarUi() {
       return 'All day';
     }
     try {
+      let startTime, endTime;
+      
       if (typeof when.start_time === 'number') {
-        const date = new Date(when.start_time * 1000);
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        startTime = DateTime.fromSeconds(when.start_time)
+          .setZone(when.start_timezone || 'local');
+        endTime = DateTime.fromSeconds(when.end_time)
+          .setZone(when.end_timezone || 'local');
       } else if (typeof when.start_time === 'string') {
-        const date = new Date(when.start_time);
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        startTime = DateTime.fromISO(when.start_time)
+          .setZone(when.start_timezone || 'local');
+        endTime = DateTime.fromISO(when.end_time)
+          .setZone(when.end_timezone || 'local');
       }
-      return 'Invalid Time Format';
+  
+      return `${startTime.toFormat('h:mm a')} - ${endTime.toFormat('h:mm a')}`;
     } catch (error) {
+      console.error('Time formatting error:', error);
       return 'Time Error';
     }
   };
