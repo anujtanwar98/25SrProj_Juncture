@@ -3,6 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View, SafeAreaView, ScrollView } fr
 import { auth } from '../auth/firebase';
 import { signOut } from 'firebase/auth';
 import CalendarUi from './CalendarUi';
+import CalendarSync from './CalendarSync';
 
 export default function HomeScreen({ navigation }) {
   const handleSignOut = async () => {
@@ -34,6 +35,7 @@ export default function HomeScreen({ navigation }) {
       {renderHeader()}
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <CalendarUi />
+        {/* <CalendarSync /> */}
       </ScrollView>
     </SafeAreaView>
   );
