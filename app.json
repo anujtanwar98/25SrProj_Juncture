@@ -1,5 +1,6 @@
 {
   "expo": {
+    "newArchEnabled": true,
     "name": "Juncture",
     "slug": "25SrProj_Juncture",
     "version": "1.0.0",
