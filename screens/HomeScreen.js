@@ -4,40 +4,52 @@ import { auth } from '../auth/firebase';
 import { signOut } from 'firebase/auth';
 import CalendarUi from './CalendarUi';
 import CalendarSync from './CalendarSync';
+import PullCalendar from './PullCalendar';
+import CalendarSharingComponent from './sharedCalendar';
+import SharedCalendarsViewer from './SharedCalendarsViewer';
+import CombinedCalendar from './CombinedCalendar';
 
 export default function HomeScreen({ navigation }) {
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      navigation.replace('Login');
-    } catch (error) {
-      Alert.alert('Error', error.message);
-    }
-  };
+  // const handleSignOut = async () => {
+  //   try {
+  //     await signOut(auth);
+  //     navigation.replace('Login');
+  //   } catch (error) {
+  //     Alert.alert('Error', error.message);
+  //   }
+  // };
 
-  const renderHeader = () => (
-    <View style={styles.header}>
-      <View style={styles.headerLeft}>
-        <Text style={styles.welcomeText}>Welcome!</Text>
-        <Text style={styles.emailText}>{auth.currentUser?.email}</Text>
-        <Text style={styles.emailText}>{auth.currentUser?.displayName}</Text>
-      </View>
-      <TouchableOpacity
-        style={styles.logoutButton}
-        onPress={handleSignOut}>
-        <Text style={styles.logoutButtonText}>Sign out</Text>
-      </TouchableOpacity>
-    </View>
-  );
+  // const renderHeader = () => (
+  //   <View style={styles.header}>
+  //     <View style={styles.headerLeft}>
+  //       <Text style={styles.welcomeText}>Welcome!</Text>
+  //       <Text style={styles.emailText}>{auth.currentUser?.email}</Text>
+  //       <Text style={styles.emailText}>{auth.currentUser?.displayName}</Text>
+  //     </View>
+  //     <TouchableOpacity
+  //       style={styles.logoutButton}
+  //       onPress={handleSignOut}>
+  //       <Text style={styles.logoutButtonText}>Sign out</Text>
+  //     </TouchableOpacity>
+  //   </View>
+  // );
 
   return (
+    <>
     <SafeAreaView style={styles.container}>
-      {renderHeader()}
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        <CalendarUi />
+      {/* {renderHeader()} */}
+      <CombinedCalendar />
+      {/* <PullCalendar /> */}
+      {/* <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}> */}
+        {/* <CalendarUi /> */}
+        {/* <CalendarSharingComponent /> */}
+        {/* <SharedCalendarsViewer /> */}
         {/* <CalendarSync /> */}
-      </ScrollView>
+        {/* <CombinedCalendar /> */}
+      {/* </ScrollView> */}
+      {/* <PullCalendar /> */}
     </SafeAreaView>
+    </>
   );
 }
 
