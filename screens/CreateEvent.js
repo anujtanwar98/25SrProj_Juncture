@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
+import { View, StyleSheet, Text, TouchableOpacity, ActivityIndicator, TextInput, ScrollView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { auth } from '../auth/firebase';
@@ -13,9 +13,10 @@ export default function CreateEvent() {
     const [error, setError] = useState(null);
     const [title, setTitle] = useState('');
     const [startDate, setStartDate] = useState(new Date());
-    const [endDate, setEndDate] = useState(new Date(Date.now() + 30 * 60000)); // Default to 30 minutes later
+    const [endDate, setEndDate] = useState(new Date(Date.now() + 30 * 60000));
     const [showStartPicker, setShowStartPicker] = useState(false);
     const [showEndPicker, setShowEndPicker] = useState(false);
+    const [participants, setParticipants] = useState([{ name: '', email: '' }]);
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(user => {
@@ -44,6 +45,21 @@ export default function CreateEvent() {
         }
     };
 
+    const addParticipant = () => {
+        setParticipants([...participants, { name: '', email: '' }]);
+    };
+
+    const removeParticipant = (index) => {
+        const newParticipants = participants.filter((_, i) => i !== index);
+        setParticipants(newParticipants);
+    };
+
+    const updateParticipant = (index, field, value) => {
+        const newParticipants = [...participants];
+        newParticipants[index][field] = value;
+        setParticipants(newParticipants);
+    };
+
     const createEvent = async () => {
         if (!auth.currentUser) {
             setError('Please login first');
@@ -60,6 +76,13 @@ export default function CreateEvent() {
             return;
         }
 
+        // Validate participants
+        const validParticipants = participants.filter(p => p.name.trim() && p.email.trim());
+        // if (validParticipants.length < participants.length) {
+        //     setError('Please fill in all participant details or remove empty entries');
+        //     return;
+        // }
+
         try {
             setIsCreatingEvent(true);
             setError(null);
@@ -69,6 +92,7 @@ export default function CreateEvent() {
                 title: title.trim(),
                 start_time: startDate.toISOString(),
                 end_time: endDate.toISOString(),
+                participants: validParticipants,
             };
 
             const response = await fetch(`${API_BASE_URL}/nylas/create-event`, {
@@ -87,6 +111,7 @@ export default function CreateEvent() {
             const event = await response.json();
             setStatus('Event created successfully!');
             setTitle('');
+            setParticipants([{ name: '', email: '' }]);
             setTimeout(() => setStatus(''), 3000);
         } catch (error) {
             console.error('Error creating event:', error);
@@ -97,80 +122,113 @@ export default function CreateEvent() {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Create Calendar Event</Text>
+        <ScrollView>
+            <View style={styles.container}>
+                <Text style={styles.title}>Create Calendar Event</Text>
 
-            {error && (
-                <Text style={styles.errorText}>{error}</Text>
-            )}
-
-            {status ? (
-                <Text style={styles.statusText}>{status}</Text>
-            ) : null}
-
-            <TextInput
-                style={styles.input}
-                placeholder="Event Title"
-                value={title}
-                onChangeText={setTitle}
-            />
-
-            <TouchableOpacity
-                style={styles.timeButton}
-                onPress={() => setShowStartPicker(true)}>
-                <Text>Start Time: {startDate.toLocaleString()}</Text>
-            </TouchableOpacity>
-
-            {showStartPicker && (
-                <DateTimePicker
-                    value={startDate}
-                    mode="datetime"
-                    onChange={(event, date) => {
-                        setShowStartPicker(false);
-                        if (date) {
-                            setStartDate(date);
-                            // Update end date to be 30 minutes after start if it's before start
-                            if (endDate <= date) {
-                                setEndDate(new Date(date.getTime() + 30 * 60000));
-                            }
-                        }
-                    }}
-                />
-            )}
-
-            <TouchableOpacity
-                style={styles.timeButton}
-                onPress={() => setShowEndPicker(true)}>
-                <Text>End Time: {endDate.toLocaleString()}</Text>
-            </TouchableOpacity>
-
-            {showEndPicker && (
-                <DateTimePicker
-                    value={endDate}
-                    mode="datetime"
-                    minimumDate={startDate}
-                    onChange={(event, date) => {
-                        setShowEndPicker(false);
-                        if (date) setEndDate(date);
-                    }}
-                />
-            )}
-
-            <TouchableOpacity
-                style={[
-                    styles.button,
-                    isCreatingEvent && styles.disabledButton,
-                    !isAuthenticated && styles.disabledButton
-                ]}
-                onPress={createEvent}
-                disabled={isCreatingEvent || !isAuthenticated}>
-                {isCreatingEvent ? (
-                    <ActivityIndicator color="#fff" />
-                ) : (
-                    <Text style={styles.buttonText}>Create Event</Text>
+                {error && (
+                    <Text style={styles.errorText}>{error}</Text>
                 )}
-            </TouchableOpacity>
-        </View>
+
+                {status ? (
+                    <Text style={styles.statusText}>{status}</Text>
+                ) : null}
+
+                <TextInput
+                    style={styles.input}
+                    placeholder="Event Title"
+                    value={title}
+                    onChangeText={setTitle}
+                />
+
+                <TouchableOpacity
+                    style={styles.timeButton}
+                    onPress={() => setShowStartPicker(true)}>
+                    <Text>Start Time: {startDate.toLocaleString()}</Text>
+                </TouchableOpacity>
+
+                {showStartPicker && (
+                    <DateTimePicker
+                        value={startDate}
+                        mode="datetime"
+                        onChange={(event, date) => {
+                            setShowStartPicker(false);
+                            if (date) {
+                                setStartDate(date);
+                                if (endDate <= date) {
+                                    setEndDate(new Date(date.getTime() + 30 * 60000));
+                                }
+                            }
+                        }}
+                    />
+                )}
+
+                <TouchableOpacity
+                    style={styles.timeButton}
+                    onPress={() => setShowEndPicker(true)}>
+                    <Text>End Time: {endDate.toLocaleString()}</Text>
+                </TouchableOpacity>
+
+                {showEndPicker && (
+                    <DateTimePicker
+                        value={endDate}
+                        mode="datetime"
+                        minimumDate={startDate}
+                        onChange={(event, date) => {
+                            setShowEndPicker(false);
+                            if (date) setEndDate(date);
+                        }}
+                    />
+                )}
+
+                <Text style={styles.sectionTitle}>Participants</Text>
+                {participants.map((participant, index) => (
+                    <View key={index} style={styles.participantContainer}>
+                        <TextInput
+                            style={styles.participantInput}
+                            placeholder="Name"
+                            value={participant.name}
+                            onChangeText={(value) => updateParticipant(index, 'name', value)}
+                        />
+                        <TextInput
+                            style={styles.participantInput}
+                            placeholder="Email"
+                            value={participant.email}
+                            onChangeText={(value) => updateParticipant(index, 'email', value)}
+                            keyboardType="email-address"
+                        />
+                        {participants.length > 1 && (
+                            <TouchableOpacity
+                                style={styles.removeButton}
+                                onPress={() => removeParticipant(index)}>
+                                <Text style={styles.removeButtonText}>Remove</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                ))}
+
+                <TouchableOpacity
+                    style={styles.addButton}
+                    onPress={addParticipant}>
+                    <Text style={styles.addButtonText}>Add Participant</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={[
+                        styles.button,
+                        isCreatingEvent && styles.disabledButton,
+                        !isAuthenticated && styles.disabledButton
+                    ]}
+                    onPress={createEvent}
+                    disabled={isCreatingEvent || !isAuthenticated}>
+                    {isCreatingEvent ? (
+                        <ActivityIndicator color="#fff" />
+                    ) : (
+                        <Text style={styles.buttonText}>Create Event</Text>
+                    )}
+                </TouchableOpacity>
+            </View>
+        </ScrollView>
     );
 }
 
@@ -188,42 +246,42 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.23,
         shadowRadius: 2.62,
         elevation: 4,
-      },
-      title: {
+    },
+    title: {
         fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 20,
         color: '#2E66E7',
         textAlign: 'center',
-      },
-      button: {
+    },
+    button: {
         backgroundColor: '#34C759',
         paddingHorizontal: 30,
         paddingVertical: 15,
         borderRadius: 25,
         alignItems: 'center',
         marginVertical: 10,
-      },
-      buttonText: {
+    },
+    buttonText: {
         color: '#fff',
         fontSize: 16,
         fontWeight: '600',
-      },
-      disabledButton: {
+    },
+    disabledButton: {
         opacity: 0.7,
-      },
-      statusText: {
+    },
+    statusText: {
         marginVertical: 10,
         fontSize: 16,
         color: '#2E66E7',
         textAlign: 'center',
-      },
-      errorText: {
+    },
+    errorText: {
         marginVertical: 10,
         fontSize: 16,
         color: '#dc3545',
         textAlign: 'center',
-      },
+    },
     input: {
         borderWidth: 1,
         borderColor: '#ddd',
@@ -238,5 +296,47 @@ const styles = StyleSheet.create({
         borderColor: '#ddd',
         borderRadius: 8,
         marginVertical: 5,
+    },
+    participantContainer: {
+        marginVertical: 5,
+        padding: 10,
+        backgroundColor: '#f8f9fa',
+        borderRadius: 8,
+    },
+    participantInput: {
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        padding: 10,
+        marginVertical: 5,
+        fontSize: 16,
+    },
+    removeButton: {
+        backgroundColor: '#dc3545',
+        padding: 8,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginTop: 5,
+    },
+    removeButtonText: {
+        color: '#fff',
+        fontSize: 14,
+    },
+    addButton: {
+        backgroundColor: '#6c757d',
+        padding: 10,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginVertical: 10,
+    },
+    addButtonText: {
+        color: '#fff',
+        fontSize: 16,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginTop: 20,
+        marginBottom: 10,
     },
 });
