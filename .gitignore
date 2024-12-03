@@ -38,3 +38,5 @@ yarn-error.*
 extrafiles/
 
 firebase.js
+
+supabase.js
