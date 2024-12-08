@@ -17,6 +17,8 @@ export default function CreateEvent() {
     const [showStartPicker, setShowStartPicker] = useState(false);
     const [showEndPicker, setShowEndPicker] = useState(false);
     const [participants, setParticipants] = useState([{ name: '', email: '' }]);
+    const [location, setLocation] = useState('');
+    const [description, setDescription] = useState('');
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(user => {
@@ -93,6 +95,8 @@ export default function CreateEvent() {
                 start_time: startDate.toISOString(),
                 end_time: endDate.toISOString(),
                 participants: validParticipants,
+                location: location.trim(),
+                description: description.trim()
             };
 
             const response = await fetch(`${API_BASE_URL}/nylas/create-event`, {
@@ -111,6 +115,8 @@ export default function CreateEvent() {
             const event = await response.json();
             setStatus('Event created successfully!');
             setTitle('');
+            setLocation('');
+            setDescription('');
             setParticipants([{ name: '', email: '' }]);
             setTimeout(() => setStatus(''), 3000);
         } catch (error) {
@@ -212,6 +218,21 @@ export default function CreateEvent() {
                     onPress={addParticipant}>
                     <Text style={styles.addButtonText}>Add Participant</Text>
                 </TouchableOpacity>
+
+                <TextInput
+                    style={styles.input}
+                    placeholder="Location"
+                    value={location}
+                    onChangeText={setLocation}
+                />
+                <TextInput
+                    style={[styles.input, styles.multilineInput]}
+                    placeholder="Description"
+                    value={description}
+                    onChangeText={setDescription}
+                    multiline
+                    numberOfLines={4}
+                />
 
                 <TouchableOpacity
                     style={[
@@ -338,5 +359,9 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginTop: 20,
         marginBottom: 10,
+    },
+    multilineInput: {
+        height: 100,
+        textAlignVertical: 'top',
     },
 });
