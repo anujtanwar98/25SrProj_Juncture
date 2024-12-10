@@ -14,8 +14,6 @@ export default function CreateEvent() {
     const [title, setTitle] = useState('');
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date(Date.now() + 30 * 60000));
-    const [showStartPicker, setShowStartPicker] = useState(false);
-    const [showEndPicker, setShowEndPicker] = useState(false);
     const [participants, setParticipants] = useState([{ name: '', email: '' }]);
     const [location, setLocation] = useState('');
     const [description, setDescription] = useState('');
@@ -130,7 +128,7 @@ export default function CreateEvent() {
     return (
         <ScrollView>
             <View style={styles.container}>
-                <Text style={styles.title}>Create Calendar Event</Text>
+                {/* <Text style={styles.title}>Create Calendar Event</Text> */}
 
                 {error && (
                     <Text style={styles.errorText}>{error}</Text>
@@ -147,18 +145,12 @@ export default function CreateEvent() {
                     onChangeText={setTitle}
                 />
 
-                <TouchableOpacity
-                    style={styles.timeButton}
-                    onPress={() => setShowStartPicker(true)}>
-                    <Text>Start Time: {startDate.toLocaleString()}</Text>
-                </TouchableOpacity>
-
-                {showStartPicker && (
+                <View style={styles.datePickerContainer}>
+                    <Text style={styles.dateLabel}>Start Time:</Text>
                     <DateTimePicker
                         value={startDate}
                         mode="datetime"
                         onChange={(event, date) => {
-                            setShowStartPicker(false);
                             if (date) {
                                 setStartDate(date);
                                 if (endDate <= date) {
@@ -166,26 +158,22 @@ export default function CreateEvent() {
                                 }
                             }
                         }}
+                        style={styles.datePicker}
                     />
-                )}
+                </View>
 
-                <TouchableOpacity
-                    style={styles.timeButton}
-                    onPress={() => setShowEndPicker(true)}>
-                    <Text>End Time: {endDate.toLocaleString()}</Text>
-                </TouchableOpacity>
-
-                {showEndPicker && (
+                <View style={styles.datePickerContainer}>
+                    <Text style={styles.dateLabel}>End Time:</Text>
                     <DateTimePicker
                         value={endDate}
                         mode="datetime"
                         minimumDate={startDate}
                         onChange={(event, date) => {
-                            setShowEndPicker(false);
                             if (date) setEndDate(date);
                         }}
+                        style={styles.datePicker}
                     />
-                )}
+                </View>
 
                 <Text style={styles.sectionTitle}>Participants</Text>
                 {participants.map((participant, index) => (
@@ -257,16 +245,7 @@ const styles = StyleSheet.create({
     container: {
         padding: 20,
         backgroundColor: '#fff',
-        borderRadius: 10,
         margin: 10,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.23,
-        shadowRadius: 2.62,
-        elevation: 4,
     },
     title: {
         fontSize: 20,
