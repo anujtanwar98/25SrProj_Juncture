@@ -26,16 +26,9 @@ function BottomTabs() {
           elevation: 0,
           marginLeft: 10,
           marginRight: 10,
-          backgroundColor: '#ffffff',
+          backgroundColor: '#DCDCDC',
           borderRadius: 50,
-          height: 60,
-          shadowColor: '#000',
-          shadowOffset: {
-            width: 0,
-            height: 10,
-          },
-          shadowOpacity: 0.25,
-          shadowRadius: 3.5,
+          height: 50,
         },
       }}>
       <Tab.Screen
@@ -49,7 +42,7 @@ function BottomTabs() {
               color={focused ? '#007AFF' : '#666666'}
             />
           ),
-          tabBarLabel: 'Memory Wall'
+          tabBarLabel: ''
         }}
       />
       <Tab.Screen
@@ -63,7 +56,7 @@ function BottomTabs() {
               color={focused ? '#007AFF' : '#666666'}
             />
           ),
-          tabBarLabel: 'Calendar'
+          tabBarLabel: ''
         }}
       />
       <Tab.Screen
@@ -77,7 +70,7 @@ function BottomTabs() {
               color={focused ? '#007AFF' : '#666666'}
             />
           ),
-          tabBarLabel: 'Profile'
+          tabBarLabel: ''
         }}
       />
     </Tab.Navigator>
