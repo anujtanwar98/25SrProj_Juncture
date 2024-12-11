@@ -15,7 +15,6 @@ const CombinedCalendar = () => {
   const [loading, setLoading] = useState(true);
   const [firebaseEvents, setFirebaseEvents] = useState({});
   const [markedDates, setMarkedDates] = useState({});
-  const calendarRef = useRef(null);
   const [timelineHeight, setTimelineHeight] = useState(SCREEN_HEIGHT - CALENDAR_CLOSED_HEIGHT);
 
   // Firebase data fetching
@@ -118,8 +117,7 @@ const CombinedCalendar = () => {
   };
 
   useEffect(() => {
-    if (!isMonthView && calendarRef.current) {
-      calendarRef.current.closeCalendar();
+    if (!isMonthView) {
       setTimelineHeight(SCREEN_HEIGHT - CALENDAR_CLOSED_HEIGHT);
     }
   }, [isMonthView]);
@@ -171,12 +169,7 @@ const CombinedCalendar = () => {
   const onDayPress = (day) => {
     setSelectedDate(day.dateString);
     setIsMonthView(false);
-    if (calendarRef.current) {
-      setTimeout(() => {
-        calendarRef.current.closeCalendar();
-        setTimelineHeight(SCREEN_HEIGHT - CALENDAR_CLOSED_HEIGHT);
-      }, 0);
-    }
+    setTimelineHeight(SCREEN_HEIGHT - CALENDAR_CLOSED_HEIGHT);
   };
 
   const onCalendarToggled = (isOpen) => {
@@ -202,12 +195,10 @@ const CombinedCalendar = () => {
         style={styles.calendarProvider}
       >
         <ExpandableCalendar
-          ref={calendarRef}
           firstDay={1}
           markedDates={markedDates}
           onDayPress={onDayPress}
           onCalendarToggled={onCalendarToggled}
-          hideArrows={isMonthView}
           hideKnob={false}
           disableAllTouchEventsForDisabledDays
           theme={{
@@ -216,7 +207,6 @@ const CombinedCalendar = () => {
             todayTextColor: '#4CAF50',
           }}
         />
-        {!isMonthView && (
           <View style={[styles.timelineContainer, { height: timelineHeight }]}>
             <TimelineList
               events={firebaseEvents}
@@ -234,7 +224,6 @@ const CombinedCalendar = () => {
               style={styles.timeline}
             />
           </View>
-        )}
       </CalendarProvider>
     </View>
   );
